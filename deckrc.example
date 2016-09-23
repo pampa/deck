@@ -1,0 +1,23 @@
+root = "/"
+data = "/.deck"
+prune = [
+  "^/\\.git$",
+  "^/dist$",
+  "^/boot/grub$",
+  "^/proc$",
+  "^/dev$",
+  "^/mnt$",
+  "^/sys$",
+  "^/src$",
+  "^/root$",
+  "^/home$",
+  "^/build$",
+  "^/tools$",
+  "/lost\\+found$",
+]
+ignore = [
+  "^/etc/passwd$",
+  "^/etc/passwd-$",
+  "^/etc/group$",
+  "^/etc/group-$",
+]
