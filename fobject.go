@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"crypto/sha1"
+	"encoding/gob"
 	"encoding/hex"
 	"errors"
 	"io"
@@ -112,6 +113,27 @@ func (f FileObject) IsDifferent(fn FileObject, hash bool) error {
 		}
 	}
 	return nil
+}
+
+func (f FileObject) ToBytes() []byte {
+	var buf bytes.Buffer
+	enc := gob.NewEncoder(&buf)
+	err := enc.Encode(f)
+	if err != nil {
+		log.Error(err)
+	}
+	return buf.Bytes()
+}
+
+func readFileObject(v []byte) FileObject {
+	buf := bytes.NewBuffer(v)
+	var fo FileObject
+	enc := gob.NewDecoder(buf)
+	err := enc.Decode(&fo)
+	if err != nil {
+		log.Error(err)
+	}
+	return fo
 }
 
 func getFileObject(f string, hash bool) FileObject {

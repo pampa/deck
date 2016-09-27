@@ -126,7 +126,7 @@ func main() {
 				if len(c.Args()) == 0 {
 					log.Error("show what?")
 				}
-				deck.Show(c.Args()[0], c.Bool("mk"))
+				deck.Show(c.Args()[0])
 			},
 		},
 		{
@@ -142,6 +142,14 @@ func main() {
 			Usage: "reset file to its previous state",
 			Action: func(c *cli.Context) {
 				deck.Reset(c.Args())
+			},
+		},
+		{
+			Name:    "which",
+			Aliases: []string{"w", "who", "what"},
+			Usage:   "show which package a file belongs to",
+			Action: func(c *cli.Context) {
+				deck.Which(c.Args())
 			},
 		},
 	}

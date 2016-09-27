@@ -1,8 +1,6 @@
 package main
 
 import (
-	"bytes"
-	"encoding/gob"
 	"fmt"
 	"github.com/BurntSushi/toml"
 	"github.com/boltdb/bolt"
@@ -222,26 +220,6 @@ func (d *Deck) Commit(pak string, ver string) {
 		return nil
 	})
 }
-func (f FileObject) ToBytes() []byte {
-	var buf bytes.Buffer
-	enc := gob.NewEncoder(&buf)
-	err := enc.Encode(f)
-	if err != nil {
-		log.Error(err)
-	}
-	return buf.Bytes()
-}
-
-func readFileObject(v []byte) FileObject {
-	buf := bytes.NewBuffer(v)
-	var fo FileObject
-	enc := gob.NewDecoder(buf)
-	err := enc.Decode(&fo)
-	if err != nil {
-		log.Error(err)
-	}
-	return fo
-}
 
 func appendPackage(s []Package, n Package) []Package {
 	for _, i := range s {
@@ -267,7 +245,7 @@ func (d *Deck) Packages() []Package {
 	return packages
 }
 
-func (d *Deck) Show(pak string, mk bool) {
+func (d *Deck) Show(pak string) {
 	d.db.View(func(tx *bolt.Tx) error {
 		bkIndex := tx.Bucket(index)
 		bkIndex.ForEach(func(k, v []byte) error {
@@ -277,6 +255,20 @@ func (d *Deck) Show(pak string, mk bool) {
 			}
 			return nil
 		})
+		return nil
+	})
+}
+
+func (d *Deck) Which(files []string) {
+	d.db.View(func(tx *bolt.Tx) error {
+		bkIndex := tx.Bucket(index)
+		for _, f := range files {
+			kn := bkIndex.Get([]byte(f))
+			if kn != nil {
+				fo := readFileObject(kn)
+				fmt.Println(fo.Package.Name, fo.Package.Version, f)
+			}
+		}
 		return nil
 	})
 }
