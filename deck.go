@@ -61,11 +61,11 @@ func (d *Deck) Close() {
 	d.db.Close()
 }
 
-func (d *Deck) Scan(hash bool, pick bool) {
-
+func (d *Deck) fsWalk(hash bool) ([]string, []string, []string, []string) {
 	var newFiles []string
 	var pickedFiles []string
 	var modifiedFiles []string
+	var missingFiles []string
 
 	if err := d.db.View(func(tx *bolt.Tx) error {
 		bkPicks := tx.Bucket(picks)
@@ -100,10 +100,24 @@ func (d *Deck) Scan(hash bool, pick bool) {
 				return nil
 			}
 		})
+		bkIndex.ForEach(func(k, v []byte) error {
+			_, err := os.Lstat(string(k))
+			if os.IsNotExist(err) {
+				missingFiles = append(missingFiles, string(k))
+			}
+			return nil
+		})
 		return nil
 	}); err != nil {
 		log.Error(err)
 	}
+
+	return newFiles, pickedFiles, modifiedFiles, missingFiles
+}
+
+func (d *Deck) Scan(hash bool, pick bool) {
+
+	newFiles, pickedFiles, modifiedFiles, missingFiles := d.fsWalk(hash)
 
 	if pick {
 		deck.Pick(newFiles)
@@ -115,6 +129,7 @@ func (d *Deck) Scan(hash bool, pick bool) {
 	}
 
 	printFiles("New files", newFiles)
+	printFiles("Missing files", missingFiles)
 	printFiles("Modified files", modifiedFiles)
 	printFiles("Picked files", pickedFiles)
 }

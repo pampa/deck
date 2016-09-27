@@ -39,8 +39,12 @@ type FileObject struct {
 
 func (f FileObject) Reset(dst string) {
 	if f.IsLink() {
-		if err := os.Remove(dst); err != nil {
-			log.Error(err)
+		_, err := os.Lstat(dst)
+		if os.IsNotExist(err) {
+		} else {
+			if err := os.Remove(dst); err != nil {
+				log.Error(err)
+			}
 		}
 		if err := os.Symlink(f.Ref, dst); err != nil {
 			log.Error(err)
