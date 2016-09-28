@@ -152,6 +152,14 @@ func main() {
 				deck.Which(c.Args())
 			},
 		},
+		{
+			Name:    "doctor",
+			Aliases: []string{"doc", "d"},
+			Usage:   "run database sanity checks",
+			Action: func(c *cli.Context) {
+				deck.Doctor()
+			},
+		},
 	}
 	app.Run(os.Args)
 }

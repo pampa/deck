@@ -260,6 +260,19 @@ func (d *Deck) Packages() []Package {
 	return packages
 }
 
+func (d *Deck) Doctor() {
+	d.db.View(func(tx *bolt.Tx) error {
+		bkIndex := tx.Bucket(index)
+		bkIndex.ForEach(func(k, v []byte) error {
+			if matchAny(string(k), d.Ignore) {
+				fmt.Println("Ignored file in index", string(k))
+			}
+			return nil
+		})
+		return nil
+	})
+}
+
 func (d *Deck) Show(pak string) {
 	d.db.View(func(tx *bolt.Tx) error {
 		bkIndex := tx.Bucket(index)
