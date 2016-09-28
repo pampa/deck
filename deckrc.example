@@ -1,5 +1,6 @@
 root = "/"
 data = "/.deck"
+git  = true
 prune = [
   "^/\\.git$",
   "^/dist$",

@@ -5,16 +5,20 @@ import (
 	"github.com/BurntSushi/toml"
 	"github.com/boltdb/bolt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"sort"
+	"strings"
 )
 
 type Deck struct {
-	Root   string
-	Data   string
-	Prune  []string
-	Ignore []string
-	db     *bolt.DB
+	Root     string
+	Data     string
+	Prune    []string
+	Ignore   []string
+	Git      bool
+	gitFiles map[string]bool
+	db       *bolt.DB
 }
 
 var picks = []byte("picks")
@@ -30,6 +34,7 @@ func (d *Deck) Init(f string) {
 	log.Debug("Data", d.Data)
 	log.Debug("Prune", d.Prune)
 	log.Debug("Ignore", d.Ignore)
+	log.Debug("Git", d.Git)
 
 	if _, err := os.Stat(d.Root); err != nil {
 		log.Error(err)
@@ -55,6 +60,26 @@ func (d *Deck) Init(f string) {
 	}); err != nil {
 		log.Error(err)
 	}
+
+	if d.Git {
+		git, err := exec.LookPath("git")
+		if err != nil {
+			log.Error(err)
+		}
+		cmd := exec.Command(git, "ls-tree", "-r", "HEAD", "--name-only")
+		cmd.Dir = d.Root
+
+		out, err := cmd.Output()
+		if err != nil {
+			fmt.Println(string(out))
+			log.Error(err)
+		}
+		a_out := strings.Split(strings.TrimSpace(string(out)), "\n")
+		d.gitFiles = make(map[string]bool)
+		for _, v := range a_out {
+			d.gitFiles[d.Root+v] = true
+		}
+	}
 }
 
 func (d *Deck) Close() {
@@ -76,6 +101,9 @@ func (d *Deck) fsWalk(hash bool) ([]string, []string, []string, []string) {
 				return filepath.SkipDir
 			} else if matchAny(p, d.Ignore) {
 				log.Debug("Ignore", p)
+				return nil
+			} else if d.ignoreGit(p) {
+				log.Debug("Skip git", p)
 				return nil
 			} else {
 				if i.Mode().IsRegular() || (i.Mode()&os.ModeSymlink != 0) {
@@ -260,12 +288,27 @@ func (d *Deck) Packages() []Package {
 	return packages
 }
 
+func (d *Deck) ignoreGit(k string) bool {
+	if d.Git {
+		if _, ok := d.gitFiles[k]; ok == true {
+			return true
+		} else {
+			return false
+		}
+	} else {
+		return false
+	}
+}
+
 func (d *Deck) Doctor() {
 	d.db.View(func(tx *bolt.Tx) error {
 		bkIndex := tx.Bucket(index)
 		bkIndex.ForEach(func(k, v []byte) error {
 			if matchAny(string(k), d.Ignore) {
 				fmt.Println("Ignored file in index", string(k))
+			}
+			if d.ignoreGit(string(k)) {
+				fmt.Println("Git tracked file in index", string(k))
 			}
 			return nil
 		})
