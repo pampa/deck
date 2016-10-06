@@ -7,8 +7,8 @@ import (
 
 func main() {
 	app := cli.NewApp()
-	app.Usage = "Cyberdeck Linux package manager"
-	app.Version = "0x01"
+	app.Usage = "hands off package manager"
+	app.Version = "0.1.0"
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
 			Name:  "config, c",
@@ -39,7 +39,7 @@ func main() {
 		{
 			Name:    "scan",
 			Aliases: []string{"s"},
-			Usage:   "scan for changes",
+			Usage:   "scan the filesystem for changes",
 			Flags: []cli.Flag{
 				cli.BoolFlag{
 					Name:  "hash, s",
@@ -78,7 +78,7 @@ func main() {
 		},
 		{
 			Name:  "commit",
-			Usage: "commit package to index",
+			Usage: "commit picked files to index, adding package and version tags",
 			Flags: []cli.Flag{
 				cli.StringFlag{
 					Name:  "package, p",
