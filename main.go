@@ -145,6 +145,13 @@ func main() {
 			},
 		},
 		{
+			Name:  "uninstall",
+			Usage: "uninstall package",
+			Action: func(c *cli.Context) {
+				deck.Uninstall(c.Args()[0])
+			},
+		},
+		{
 			Name:    "which",
 			Aliases: []string{"w", "who", "what"},
 			Usage:   "show which package a file belongs to",

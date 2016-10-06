@@ -330,6 +330,26 @@ func (d *Deck) Show(pak string) {
 	})
 }
 
+func (d *Deck) Uninstall(pak string) {
+	d.db.Update(func(tx *bolt.Tx) error {
+		bkIndex := tx.Bucket(index)
+		bkIndex.ForEach(func(k, v []byte) error {
+			fo := readFileObject(v)
+			if fo.Package.Name == pak {
+				fmt.Println("rm", string(k))
+				if err := os.Remove(string(k)); err != nil {
+					log.Error(err)
+				}
+				if err := bkIndex.Delete(k); err != nil {
+					return err
+				}
+			}
+			return nil
+		})
+		return nil
+	})
+}
+
 func (d *Deck) Which(files []string) {
 	d.db.View(func(tx *bolt.Tx) error {
 		bkIndex := tx.Bucket(index)
