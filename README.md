@@ -33,7 +33,7 @@ This small project tries to address this problem:
 
 `deck` keeps a record of the file's metadata and a copy of the contents for every file
 you add to the database. Then when you scan the filesystem for changes it compares it
-with the previously recorded state and reports any files that have been added, modifid
+with the previously recorded state and reports any files that have been added, modified
 or deleted.
 
 `deck` is a written in *Go* and *statically linked*. There are no external dependencies, 
