@@ -37,7 +37,7 @@ with the previously recorded state and reports any files that have been added, m
 or deleted.
 
 `deck` is a written in *Go* and *statically linked*. There are no external dependencies, 
-not even libc. You can drop it anywhere in your ${PATH} and start using right away.
+not even libc. You can drop it anywhere in your *$PATH* and start using right away.
 
 ## example session
 
@@ -82,6 +82,25 @@ overriden with the global `--config` option
    deck will ignore all files tracked by git
 
 there is an example config to start with in `deckrc.example`
+
+# installation
+
+A prebuilt static binary can be obtained in the [releases section](https://github.com/pampa/deck/releases) on github.
+Download the most recent release, unpack it with xz -d, set the executable bit and put it in your *$PATH*
+
+## build from source
+
+To build from source you will need a working copy of the [Go compiler](https://golang.org/doc/install)
+The following instructions will build a statically linked binary:
+
+	~ $ git clone https://github.com/pampa/deck.git                                                                                                      
+	~ $ cd deck                                                                                                                                          
+	~/deck $ go get -v -d                                                                                                                       
+	~/deck $ make deck                                                                                                                          
+
+You can also use the `go get` method, but the resulting binary will be dynamically linked against glibc
+
+	go get -v github.com/pampa/dec
 
 # usage
 
