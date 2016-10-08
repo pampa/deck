@@ -93,14 +93,25 @@ Download the most recent release, unpack it with xz -d, set the executable bit a
 To build from source you will need a working copy of the [Go compiler](https://golang.org/doc/install)
 The following instructions will build a statically linked binary:
 
-	~ $ git clone https://github.com/pampa/deck.git                                                                                                      
-	~ $ cd deck                                                                                                                                          
-	~/deck $ go get -v -d                                                                                                                       
-	~/deck $ make deck                                                                                                                          
+	~ $ git clone https://github.com/pampa/deck.git
+	~ $ cd deck
+	~/deck $ go get -v -d
+	~/deck $ make deck
 
 You can also use the `go get` method, but the resulting binary will be dynamically linked against glibc
 
-	go get -v github.com/pampa/dec
+	go get -v github.com/pampa/deck
+
+## cross compile for a different platform
+
+Deck can be easily cross compiled for a different platform and architecture
+	
+	~ $ git clone https://github.com/pampa/deck.git
+	~ $ cd deck
+	~/deck $ go get -v -d
+	~/deck $ GOOS=linux GOARCH=arm go build -v
+
+This will build a statically linked binary for the target platform. For a list of supported target platforms see https://golang.org/doc/install/source#environment
 
 # usage
 
