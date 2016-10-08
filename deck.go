@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"strings"
 )
@@ -16,6 +17,8 @@ type Deck struct {
 	Data     string
 	Prune    []string
 	Ignore   []string
+	pruneRe  []*regexp.Regexp
+	ignoreRe []*regexp.Regexp
 	Git      bool
 	gitFiles map[string]bool
 	db       *bolt.DB
@@ -35,6 +38,22 @@ func (d *Deck) Init(f string) {
 	log.Debug("Prune", d.Prune)
 	log.Debug("Ignore", d.Ignore)
 	log.Debug("Git", d.Git)
+
+	for _, s := range d.Prune {
+		r, err := regexp.Compile(s)
+		if err != nil {
+			log.Error(err, s)
+		}
+		d.pruneRe = append(d.pruneRe, r)
+	}
+
+	for _, s := range d.Ignore {
+		r, err := regexp.Compile(s)
+		if err != nil {
+			log.Error(err, s)
+		}
+		d.ignoreRe = append(d.ignoreRe, r)
+	}
 
 	if _, err := os.Stat(d.Root); err != nil {
 		log.Error(err)
@@ -96,10 +115,10 @@ func (d *Deck) fsWalk(hash bool) ([]string, []string, []string, []string) {
 		bkPicks := tx.Bucket(picks)
 		bkIndex := tx.Bucket(index)
 		filepath.Walk(d.Root, func(p string, i os.FileInfo, _ error) error {
-			if i.IsDir() && matchAny(p, d.Prune) {
+			if i.IsDir() && matchAny(p, d.pruneRe) {
 				log.Debug("Prune", p)
 				return filepath.SkipDir
-			} else if matchAny(p, d.Ignore) {
+			} else if matchAny(p, d.ignoreRe) {
 				log.Debug("Ignore", p)
 				return nil
 			} else if d.ignoreGit(p) {
@@ -304,7 +323,7 @@ func (d *Deck) Doctor() {
 	d.db.View(func(tx *bolt.Tx) error {
 		bkIndex := tx.Bucket(index)
 		bkIndex.ForEach(func(k, v []byte) error {
-			if matchAny(string(k), d.Ignore) {
+			if matchAny(string(k), d.ignoreRe) {
 				fmt.Println("Ignored file in index", string(k))
 			}
 			if d.ignoreGit(string(k)) {

@@ -7,9 +7,9 @@ import (
 	"regexp"
 )
 
-func matchAny(p string, a []string) bool {
-	for _, s := range a {
-		if m, _ := regexp.MatchString(s, p); m == true {
+func matchAny(p string, a []*regexp.Regexp) bool {
+	for _, r := range a {
+		if m := r.MatchString(p); m == true {
 			return true
 		}
 	}
