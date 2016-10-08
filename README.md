@@ -166,6 +166,8 @@ This will build a statically linked binary for the target platform. For a list o
 ## deck show - show package contents
 
 	deck show [arguments...]
+
+	--all show all tracked files 
    
 ## deck remove - remove file from index
 

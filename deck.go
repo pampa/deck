@@ -335,13 +335,17 @@ func (d *Deck) Doctor() {
 	})
 }
 
-func (d *Deck) Show(pak string) {
+func (d *Deck) Show(pak string, all bool) {
 	d.db.View(func(tx *bolt.Tx) error {
 		bkIndex := tx.Bucket(index)
 		bkIndex.ForEach(func(k, v []byte) error {
-			fo := readFileObject(v)
-			if fo.Package.Name == pak {
+			if all {
 				fmt.Println(string(k))
+			} else {
+				fo := readFileObject(v)
+				if fo.Package.Name == pak {
+					fmt.Println(string(k))
+				}
 			}
 			return nil
 		})

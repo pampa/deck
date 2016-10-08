@@ -121,12 +121,23 @@ func main() {
 		{
 			Name:    "show",
 			Aliases: []string{"o"},
-			Usage:   "show package contents",
+			Flags: []cli.Flag{
+				cli.BoolFlag{
+					Name:  "all",
+					Usage: "show all tracked files",
+				},
+			},
+			Usage: "show files in package",
 			Action: func(c *cli.Context) {
-				if len(c.Args()) == 0 {
+				if c.Bool("all") && len(c.Args()) > 0 {
+					log.Error("cant use --all with package name")
+				} else if c.Bool("all") {
+					deck.Show("", true)
+				} else if len(c.Args()) == 0 {
 					log.Error("show what?")
+				} else {
+					deck.Show(c.Args()[0], false)
 				}
-				deck.Show(c.Args()[0])
 			},
 		},
 		{
